@@ -2,8 +2,8 @@
   "openapi": "3.1.0",
   "info": {
     "title": "Sistema Notion — SoloEstoFunciona (Avanzado)",
-    "version": "2.0.2",
-    "description": "Esquema OpenAPI para gestionar Notion desde GPT personalizado. Soporta lectura, escritura y consulta estructurada en bases conectadas al sistema SoloEstoFunciona."
+    "version": "2.0.1",
+    "description": "Permite al GPT Sistema Notion consultar y mantener en coherencia la arquitectura de Notion de SoloEstoFunciona. Implementa lectura avanzada y escritura robusta en la Bitácora de Coordinación."
   },
   "servers": [
     {
@@ -21,14 +21,120 @@
   },
   "security": [
     {
-      "bearerAuth": []
+      "bearerAuth": [ntn_b7732136912as5a2YEIV5UKPW364qGZKDnWwtUp31ta2rt]
     }
   ],
   "paths": {
     "/databases/{database_id}/query": {
-      "post": {
-        "summary": "Query a database",
-        "operationId": "queryDatabase",
+  "post": {
+    "summary": "Query a database",
+    "operationId": "queryDatabase",
+    "parameters": [
+      {
+        "name": "Notion-Version",
+        "in": "header",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "example": "2022-06-28"
+        }
+      },
+      {
+        "name": "database_id",
+        "in": "path",
+        "required": true,
+        "schema": {
+          "type": "string"
+        }
+      }
+    ],
+    "requestBody": {
+      "required": false,
+      "content": {
+        "application/json": {
+          "schema": {
+            "type": "object",
+            "properties": {
+              "page_size": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 100
+              },
+              "sorts": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "property": { "type": "string" },
+                    "direction": {
+                      "type": "string",
+                      "enum": ["ascending", "descending"]
+                    }
+                  },
+                  "required": ["property", "direction"]
+                }
+              },
+              "filter": {
+                "type": "object"
+              },
+              "start_cursor": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "responses": {
+      "200": {
+        "description": "Successful query",
+        "content": {
+          "application/json": {
+            "schema": {}
+          }
+        }
+      }
+    }
+  }
+}
+
+          },
+          {
+            "name": "database_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {}
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful query",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/databases/{database_id}": {
+      "get": {
+        "summary": "Retrieve database structure",
+        "operationId": "retrieveDatabase",
         "parameters": [
           {
             "name": "Notion-Version",
@@ -48,46 +154,355 @@
             }
           }
         ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pages/{page_id}": {
+      "get": {
+        "summary": "Retrieve page",
+        "operationId": "retrievePage",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2022-06-28"
+            }
+          },
+          {
+            "name": "page_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Update page",
+        "operationId": "updatePage",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2022-06-28"
+            }
+          },
+          {
+            "name": "page_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
         "requestBody": {
-          "required": false,
+          "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "properties": {
-                  "page_size": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 100
-                  },
-                  "sorts": {
-                    "type": "array",
-                    "items": {
-                      "type": "object",
-                      "properties": {
-                        "property": { "type": "string" },
-                        "direction": {
-                          "type": "string",
-                          "enum": ["ascending", "descending"]
-                        }
-                      },
-                      "required": ["property", "direction"]
-                    }
-                  },
-                  "filter": {
-                    "type": "object"
-                  },
-                  "start_cursor": {
-                    "type": "string"
-                  }
-                }
+                "properties": {}
               }
             }
           }
         },
         "responses": {
           "200": {
-            "description": "Successful query",
+            "description": "Successful update",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/pages": {
+      "post": {
+        "summary": "Create page",
+        "operationId": "createPage",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2022-06-28"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "parent": {
+                    "type": "object",
+                    "properties": {
+                      "database_id": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "database_id"
+                    ]
+                  },
+                  "properties": {
+                    "type": "object",
+                    "properties": {
+                      "Tipo de registro": {
+                        "type": "object",
+                        "properties": {
+                          "select": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "select"
+                        ]
+                      },
+                      "Fecha de registro": {
+                        "type": "object",
+                        "properties": {
+                          "date": {
+                            "type": "object",
+                            "properties": {
+                              "start": {
+                                "type": "string",
+                                "format": "date"
+                              }
+                            },
+                            "required": [
+                              "start"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "date"
+                        ]
+                      },
+                      "Remitente": {
+                        "type": "object",
+                        "properties": {
+                          "select": {
+                            "type": "object",
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              }
+                            },
+                            "required": [
+                              "name"
+                            ]
+                          }
+                        },
+                        "required": [
+                          "select"
+                        ]
+                      },
+                      "Estado": {
+                        "type": "object",
+                        "properties": {
+                          "select": {
+                            "type": [
+                              "object",
+                              "null"
+                            ],
+                            "properties": {
+                              "name": {
+                                "type": "string"
+                              }
+                            }
+                          }
+                        }
+                      },
+                      "titulo": {
+                        "type": "object",
+                        "properties": {
+                          "title": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "text": {
+                                  "type": "object",
+                                  "properties": {
+                                    "content": {
+                                      "type": "string"
+                                    }
+                                  },
+                                  "required": [
+                                    "content"
+                                  ]
+                                }
+                              },
+                              "required": [
+                                "text"
+                              ]
+                            }
+                          }
+                        },
+                        "required": [
+                          "title"
+                        ]
+                      }
+                    },
+                    "required": [
+                      "Tipo de registro",
+                      "Fecha de registro",
+                      "Remitente",
+                      "Estado",
+                      "titulo"
+                    ]
+                  },
+                  "children": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "object": {
+                          "type": "string",
+                          "enum": [
+                            "block"
+                          ]
+                        },
+                        "type": {
+                          "type": "string",
+                          "enum": [
+                            "paragraph"
+                          ]
+                        },
+                        "paragraph": {
+                          "type": "object",
+                          "properties": {
+                            "rich_text": {
+                              "type": "array",
+                              "items": {
+                                "type": "object",
+                                "properties": {
+                                  "type": {
+                                    "type": "string",
+                                    "enum": [
+                                      "text"
+                                    ]
+                                  },
+                                  "text": {
+                                    "type": "object",
+                                    "properties": {
+                                      "content": {
+                                        "type": "string"
+                                      }
+                                    },
+                                    "required": [
+                                      "content"
+                                    ]
+                                  }
+                                },
+                                "required": [
+                                  "type",
+                                  "text"
+                                ]
+                              }
+                            }
+                          },
+                          "required": [
+                            "rich_text"
+                          ]
+                        }
+                      },
+                      "required": [
+                        "object",
+                        "type",
+                        "paragraph"
+                      ]
+                    }
+                  }
+                },
+                "required": [
+                  "parent",
+                  "properties"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful creation",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    },
+    "/blocks/{block_id}/children": {
+      "get": {
+        "summary": "Retrieve block children (page content)",
+        "operationId": "retrieveBlockChildren",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2022-06-28"
+            }
+          },
+          {
+            "name": "block_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful retrieval",
             "content": {
               "application/json": {
                 "schema": {}
