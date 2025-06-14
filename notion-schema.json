@@ -1,0 +1,101 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sistema Notion — SoloEstoFunciona (Avanzado)",
+    "version": "2.0.2",
+    "description": "Esquema OpenAPI para gestionar Notion desde GPT personalizado. Soporta lectura, escritura y consulta estructurada en bases conectadas al sistema SoloEstoFunciona."
+  },
+  "servers": [
+    {
+      "url": "https://api.notion.com/v1"
+    }
+  ],
+  "components": {
+    "schemas": {},
+    "securitySchemes": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer"
+      }
+    }
+  },
+  "security": [
+    {
+      "bearerAuth": []
+    }
+  ],
+  "paths": {
+    "/databases/{database_id}/query": {
+      "post": {
+        "summary": "Query a database",
+        "operationId": "queryDatabase",
+        "parameters": [
+          {
+            "name": "Notion-Version",
+            "in": "header",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "example": "2022-06-28"
+            }
+          },
+          {
+            "name": "database_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": false,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "page_size": {
+                    "type": "integer",
+                    "minimum": 1,
+                    "maximum": 100
+                  },
+                  "sorts": {
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "property": { "type": "string" },
+                        "direction": {
+                          "type": "string",
+                          "enum": ["ascending", "descending"]
+                        }
+                      },
+                      "required": ["property", "direction"]
+                    }
+                  },
+                  "filter": {
+                    "type": "object"
+                  },
+                  "start_cursor": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful query",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
