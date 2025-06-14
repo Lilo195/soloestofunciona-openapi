@@ -21,7 +21,7 @@
   },
   "security": [
     {
-      "bearerAuth": [ntn_b7732136912as5a2YEIV5UKPW364qGZKDnWwtUp31ta2rt]
+      "bearerAuth": []
     }
   ],
   "paths": {
