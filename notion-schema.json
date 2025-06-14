@@ -98,7 +98,7 @@
   }
 }
 
-          },
+          }
           {
             "name": "database_id",
             "in": "path",
